@@ -44,34 +44,23 @@ jobs:
           echo "$PRIVATE_KEY" > private_key.pem
           chmod 600 private_key.pem
           
-          # Test SSH connection first
-          echo "Testing SSH connection..."
-          ssh -i private_key.pem -o StrictHostKeyChecking=no -o ConnectTimeout=10 \
-            ${USER}@${HOST} "echo 'SSH connection successful'"
-          
           # Copy files to EC2
-          echo "Copying files to EC2..."
-          scp -i private_key.pem -o StrictHostKeyChecking=no -o ConnectTimeout=30 -r \
+          scp -i private_key.pem -o StrictHostKeyChecking=no -r \
             package*.json server.js src/ \
             ${USER}@${HOST}:~/ecommerce-admin-dashboard/
           
           # Copy .env file
-          echo "Copying .env file..."
-          scp -i private_key.pem -o StrictHostKeyChecking=no -o ConnectTimeout=30 \
+          scp -i private_key.pem -o StrictHostKeyChecking=no \
             .env \
             ${USER}@${HOST}:~/ecommerce-admin-dashboard/
           
           # Execute deployment script on EC2
-          echo "Executing deployment on EC2..."
-          ssh -i private_key.pem -o StrictHostKeyChecking=no -o ConnectTimeout=30 \
+          ssh -i private_key.pem -o StrictHostKeyChecking=no \
             ${USER}@${HOST} << 'ENDSSH'
             cd ~/ecommerce-admin-dashboard
-            echo "Installing dependencies..."
             npm install --production
-            echo "Restarting application..."
             pm2 restart ecommerce-admin || pm2 start server.js --name ecommerce-admin
             pm2 save
-            echo "Deployment completed!"
           ENDSSH
           
           rm -f private_key.pem
