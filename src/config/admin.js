@@ -129,8 +129,8 @@ const initAdmin = async (authenticate) => {
                         role === 'admin'
                             ? 'Welcome Admin! You have full access to all resources.'
                             : email
-                            ? `Welcome ${email}! You have access to products and orders.`
-                            : 'Welcome! Please log in to access the admin panel.',
+                                ? `Welcome ${email}! You have access to products and orders.`
+                                : 'Welcome! Please log in to access the admin panel.',
                     stats: {
                         totalUsers: role === 'admin' ? totalUsers : null,
                         totalProducts,
