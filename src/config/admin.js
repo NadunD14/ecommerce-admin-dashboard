@@ -112,25 +112,33 @@ const initAdmin = async (authenticate) => {
             handler: async (request, response, context) => {
                 const { currentAdmin } = context;
 
-                // Fetch summary statistics
-                const totalUsers = await User.count();
-                const totalProducts = await Product.count();
-                const totalOrders = await Order.count();
-                const totalCategories = await Category.count();
+                // Fetch summary statistics (safe to compute even if not logged in)
+                const [totalUsers, totalProducts, totalOrders, totalCategories] = await Promise.all([
+                    User.count(),
+                    Product.count(),
+                    Order.count(),
+                    Category.count(),
+                ]);
 
-                // Return dashboard data based on role
+                const role = currentAdmin?.role || 'guest';
+                const email = currentAdmin?.email || null;
+
+                // Return dashboard data based on role (handle unauthenticated safely)
                 return {
-                    message: currentAdmin.role === 'admin'
-                        ? `Welcome Admin! You have full access to all resources.`
-                        : `Welcome ${currentAdmin.email}! You have access to products and orders.`,
+                    message:
+                        role === 'admin'
+                            ? 'Welcome Admin! You have full access to all resources.'
+                            : email
+                            ? `Welcome ${email}! You have access to products and orders.`
+                            : 'Welcome! Please log in to access the admin panel.',
                     stats: {
-                        totalUsers: currentAdmin.role === 'admin' ? totalUsers : null,
+                        totalUsers: role === 'admin' ? totalUsers : null,
                         totalProducts,
                         totalOrders,
                         totalCategories,
                     },
-                    role: currentAdmin.role,
-                    email: currentAdmin.email,
+                    role,
+                    email,
                 };
             },
         },
