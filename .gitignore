@@ -48,3 +48,5 @@ tmp/
 # Coverage
 coverage/
 .nyc_output/
+
+.new-ecommerce
