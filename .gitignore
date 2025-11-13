@@ -1,0 +1,50 @@
+# Dependencies
+node_modules/
+
+How to make/
+
+# Environment variables
+.env
+.env.local
+.env.production
+.env.test
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Build files
+dist/
+build/
+.adminjs/
+
+# PM2
+.pm2/
+
+# Temporary files
+*.tmp
+temp/
+tmp/
+
+# Database
+*.sqlite
+*.db
+
+# Coverage
+coverage/
+.nyc_output/
