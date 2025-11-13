@@ -140,12 +140,17 @@ const buildAdminRouter = (authenticate) => {
         {
             authenticate,
             cookiePassword: process.env.JWT_SECRET,
+            cookieName: 'adminjs',
         },
         null,
         {
             resave: false,
             saveUninitialized: false,
             secret: process.env.JWT_SECRET,
+            cookie: {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+            },
         }
     );
 };
