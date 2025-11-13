@@ -6,7 +6,7 @@ const { sequelize, User } = require('./src/models/inedx');
 const authController = require('./src/controllers/authcontroller');
 const authMiddleware = require('./src/middleware/authMiddleware');
 const roleMiddleware = require('./src/middleware/roleMiddleware');
-const { adminJs, buildAdminRouter } = require('./src/config/admin');
+const { initAdmin } = require('./src/config/admin');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -41,43 +41,7 @@ const authenticate = async (email, password) => {
     }
 };
 
-// Build and use AdminJS router BEFORE body parsers (per @adminjs/express requirement)
-const adminRouter = buildAdminRouter(authenticate);
-app.use(adminJs.options.rootPath, adminRouter);
-
-// Body parsers come AFTER AdminJS
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// Public routes
-app.get('/', (req, res) => {
-    res.json({
-        message: 'E-Commerce Admin Dashboard API',
-        endpoints: {
-            login: 'POST /api/login',
-            admin: 'GET /admin',
-            verifyToken: 'GET /api/verify',
-        },
-    });
-});
-
-// Authentication routes
-app.post('/api/login', authController.login);
-app.get('/api/verify', authMiddleware, authController.verifyToken);
-
-// Example protected route (admin only)
-app.get('/api/admin/stats', authMiddleware, roleMiddleware('admin'), async (req, res) => {
-    try {
-        const totalUsers = await User.count();
-        res.json({
-            message: 'Admin statistics',
-            stats: { totalUsers },
-        });
-    } catch (error) {
-        console.error('Error fetching stats:', error);
-        res.status(500).json({ error: 'Internal server error' });
-    }
-});
+// We'll set up AdminJS, body parsers, and routes inside startServer to ensure correct ordering
 
 // Initialize database and create default admin user
 const initializeDatabase = async () => {
@@ -125,6 +89,44 @@ const startServer = async () => {
         console.error('Failed to initialize database. Exiting...');
         process.exit(1);
     }
+
+    // Initialize AdminJS (must come BEFORE body parsers)
+    const { adminJs, adminRouter } = await initAdmin(authenticate);
+    app.use(adminJs.options.rootPath, adminRouter);
+
+    // Body parsers come AFTER AdminJS
+    app.use(express.json());
+    app.use(express.urlencoded({ extended: true }));
+
+    // Public routes
+    app.get('/', (req, res) => {
+        res.json({
+            message: 'E-Commerce Admin Dashboard API',
+            endpoints: {
+                login: 'POST /api/login',
+                admin: 'GET /admin',
+                verifyToken: 'GET /api/verify',
+            },
+        });
+    });
+
+    // Authentication routes
+    app.post('/api/login', authController.login);
+    app.get('/api/verify', authMiddleware, authController.verifyToken);
+
+    // Example protected route (admin only)
+    app.get('/api/admin/stats', authMiddleware, roleMiddleware('admin'), async (req, res) => {
+        try {
+            const totalUsers = await User.count();
+            res.json({
+                message: 'Admin statistics',
+                stats: { totalUsers },
+            });
+        } catch (error) {
+            console.error('Error fetching stats:', error);
+            res.status(500).json({ error: 'Internal server error' });
+        }
+    });
 
     app.listen(PORT, () => {
         console.log(`\n🚀 Server is running on http://localhost:${PORT}`);
