@@ -249,6 +249,22 @@ Copy the entire output (including `-----BEGIN RSA PRIVATE KEY-----` and `-----EN
 
 ## 🚀 Part 5: Deploy with GitHub Actions
 
+### ⚠️ Important: Fix SSH Access First
+
+Before deploying, **you must allow GitHub Actions to SSH into your EC2**:
+
+1. Go to **AWS EC2 Console → Security Groups**
+2. Find your `ec2-security-group`
+3. Click **Edit inbound rules**
+4. **Update the SSH rule:**
+   - Type: `SSH`
+   - Port: `22`
+   - Source: Change from "My IP" to `0.0.0.0/0` (Anywhere)
+   - Description: `Allow GitHub Actions`
+5. Click **Save rules**
+
+**Note:** For better security, see `TROUBLESHOOTING_DEPLOYMENT.md` for alternative solutions like self-hosted runners.
+
 ### Workflow File Already Created
 
 The workflow file `.github/workflows/deploy.yml` is already in your repository and will:
@@ -481,6 +497,25 @@ sudo systemctl restart nginx
    ...all the content...
    -----END RSA PRIVATE KEY-----
    ```
+
+### SSH Connection Timeout
+
+**Error:** `ssh: connect to host *** port 22: Connection timed out`
+
+**This is your current issue!** The EC2 security group is blocking GitHub Actions.
+
+**Quick Fix:**
+1. Go to **EC2 Console → Security Groups**
+2. Find `ec2-security-group`
+3. Edit inbound rules
+4. Change SSH source from "My IP" to `0.0.0.0/0`
+5. Save and retry deployment
+
+**Better Solutions:**
+See `TROUBLESHOOTING_DEPLOYMENT.md` for:
+- Self-hosted GitHub runner (recommended)
+- Whitelisting GitHub IP ranges
+- Webhook-based deployment
 
 ---
 
