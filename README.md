@@ -1,627 +1,282 @@
-# E-Commerce Admin Dashboard# E-Commerce Admin Dashboard
+# E-Commerce Admin Dashboard
 
+A full-featured e-commerce admin dashboard built with Node.js, Express, PostgreSQL, Sequelize, and AdminJS. It includes JWT authentication, role-based access control (RBAC), AdminJS web UI, and a REST API.
 
+## Features
 
-A full-featured e-commerce admin dashboard built with Node.js, Express, PostgreSQL, Sequelize, and AdminJS featuring JWT authentication and role-based access control.A full-featured e-commerce admin dashboard built with Node.js, Express, PostgreSQL, Sequelize, and AdminJS.
+- Full CRUD for all resources (Users, Categories, Products, Orders, OrderItems, Settings)
+- AdminJS web interface at /admin with authentication
+- JWT-based login via /api/login and token verification via /api/verify
+- Role-based access control: Admin vs Regular user
+- Password hashing with bcrypt
+- PostgreSQL database with Sequelize ORM
+- CORS enabled for browser requests
+- Environment-based configuration via .env
 
+## Tech Stack
 
+- Node.js, Express 4.x
+- AdminJS 7.x, @adminjs/express
+- Sequelize ORM + PostgreSQL
+- JWT (jsonwebtoken) + bcrypt
 
-## What is This?## Features
+## Folder Structure
 
-
-
-An AdminJS-powered admin panel for e-commerce backend with:- ✅ Full CRUD operations for all resources
-
-- **JWT-based authentication** via `/api/login` endpoint- ✅ Role-based access control (Admin & Regular users)
-
-- **Role-based access control** (Admin vs Regular users)- ✅ JWT-based authentication
-
-- **AdminJS dashboard** at `/admin` for CRUD operations- ✅ REST API endpoints
-
-- **6 database models**: User, Category, Product, Order, OrderItem, Setting- ✅ AdminJS web interface
-
-- **Password security** with bcrypt hashing- ✅ PostgreSQL database with Sequelize ORM
-
-- ✅ Password hashing with bcrypt
-
-## Features- ✅ Environment-based configuration
-
-
-
-- ✅ Full CRUD operations for all resources## Database Models
-
-- ✅ Role-based access control (Admin & Regular users)
-
-- ✅ JWT-based authentication with 24-hour expiry1. **User** - User accounts with role-based access (admin/regular)
-
-- ✅ REST API endpoints (`/api/login`, `/api/verify`)2. **Category** - Product categories
-
-- ✅ AdminJS web interface with authentication3. **Product** - Products with pricing, stock, and category relation
-
-- ✅ PostgreSQL database with Sequelize ORM4. **Order** - Customer orders with status tracking
-
-- ✅ Password hashing with bcrypt5. **OrderItem** - Individual items within orders
-
-- ✅ CORS enabled for browser requests6. **Setting** - Application settings (admin-only)
-
-- ✅ Environment-based configuration
+```
+ecommerce-admin-dashboard/
+├── .env                      # Environment variables (not committed)
+├── .gitignore
+├── package.json
+├── server.js                 # App entrypoint (Express + AdminJS)
+└── src/
+    ├── config/
+    │   ├── admin.js         # AdminJS configuration (resources, RBAC, dashboard)
+    │   └── database.js      # Sequelize connection
+    ├── controllers/
+    │   └── authcontroller.js# Login + token verify
+    ├── middleware/
+    │   ├── authMiddleware.js# JWT verification
+    │   └── roleMiddleware.js# Role-based access
+    └── models/
+        ├── inedx.js         # Model associations (typo kept)
+        ├── User.js
+        ├── Category.js
+        ├── Product.js
+        ├── Order.js
+        ├── OrderItem.js
+        └── Setting.js
+```
 
 ## Prerequisites
 
-## Database Models
-
-- Node.js (v14 or higher)
-
-1. **User** - User accounts with role-based access (admin/regular)- PostgreSQL (v12 or higher)
-
-2. **Category** - Product categories- npm or yarn
-
-3. **Product** - Products with pricing, stock, and category relation
-
-4. **Order** - Customer orders with status tracking## Installation
-
-5. **OrderItem** - Individual items within orders
-
-6. **Setting** - Application settings (admin-only)1. **Clone the repository**
-
-   ```bash
-
-### Relationships   git clone <repository-url>
-
-- Product **belongs to** Category   cd ecommerce-admin-dashboard
-
-- Order **belongs to** User   ```
-
-- OrderItem **belongs to** Order
-
-- OrderItem **belongs to** Product2. **Install dependencies**
-
-   ```bash
-
-## Prerequisites   npm install
-
-   ```
-
 - Node.js 16+
+- PostgreSQL 12+
+- Git and npm
 
-- PostgreSQL 12+3. **Set up PostgreSQL database**
+## Setup: Clone and Run
 
-- npm or yarn   ```bash
-
-   # Connect to PostgreSQL
-
-## Folder Structure   psql -U postgres
-
-
-
-```   # Create database
-
-ecommerce-admin-dashboard/   CREATE DATABASE ecommerce_db;
-
-├── .env                      # Environment variables (not committed)   ```
-
-├── .gitignore
-
-├── package.json4. **Configure environment variables**
-
-├── server.js                 # App entrypoint (Express + AdminJS)   
-
-└── src/   Update the `.env` file with your database credentials:
-
-    ├── config/   ```env
-
-    │   ├── admin.js         # AdminJS configuration   ## Folder Structure
-
-    │   └── database.js      # Sequelize connection
-
-    ├── controllers/   ```
-
-    │   └── authcontroller.js# Login + token verify   ecommerce-admin-dashboard/
-
-    ├── middleware/   ├── .env                      # Environment variables (not committed)
-
-    │   ├── authMiddleware.js# JWT verification   ├── .gitignore
-
-    │   └── roleMiddleware.js# Role-based access   ├── package.json
-
-    └── models/   ├── server.js                 # App entrypoint (Express + AdminJS)
-
-        ├── inedx.js         # Model associations   └── src/
-
-        ├── User.js       ├── config/
-
-        ├── Category.js       │   ├── admin.js         # AdminJS configuration
-
-        ├── Product.js       │   └── database.js      # Sequelize connection
-
-        ├── Order.js       ├── controllers/
-
-        ├── OrderItem.js       │   └── authcontroller.js# Login + token verify
-
-        └── Setting.js       ├── middleware/
-
-```       │   ├── authMiddleware.js# JWT verification
-
-       │   └── roleMiddleware.js# Role-based access
-
-## How to Clone and Run       └── models/
-
-           ├── inedx.js         # Model associations (typo kept to match current file)
-
-### 1) Clone           ├── User.js
-
-```powershell           ├── Category.js
-
-git clone https://github.com/NadunD14/ecommerce-admin-dashboard.git           ├── Product.js
-
-cd ecommerce-admin-dashboard           ├── Order.js
-
-```           ├── OrderItem.js
-
-           └── Setting.js
-
-### 2) Install dependencies   ```
+### 1) Clone
 
 ```powershell
-
-npm install   ## How to Clone and Run
-
+git clone https://github.com/NadunD14/ecommerce-admin-dashboard.git
+cd ecommerce-admin-dashboard
 ```
 
-   ### Prerequisites
-
-### 3) Create PostgreSQL database   - Node.js 16+
-
-```powershell   - PostgreSQL 12+
-
-psql -U postgres -h localhost
-
-```   ### 1) Clone
-
-Then inside psql:   ```powershell
-
-```sql   # Using HTTPS
-
-CREATE DATABASE ecommerce_db;   git clone https://github.com/NadunD14/ecommerce-admin-dashboard.git
-
-\q   cd ecommerce-admin-dashboard
-
-```   ```
-
-
-
-### 4) Configure environment variables   ### 2) Install dependencies
-
-   ```powershell
-
-Create a `.env` file in the project root:   npm install
-
-```env   ```
-
-# Database Configuration
-
-DB_NAME=ecommerce_db   ### 3) Create database (PostgreSQL)
-
-DB_USER=postgres   ```powershell
-
-DB_PASS=your_postgres_password   psql -U postgres -h localhost
-
-DB_HOST=localhost   # inside psql
-
-DB_DIALECT=postgres   CREATE DATABASE ecommerce_db;
-
-   \q
-
-# Application Configuration   ```
-
-PORT=3000
-
-JWT_SECRET=your_very_strong_secret_key_here   ### 4) Create .env
-
-ADMIN_EMAIL=admin@example.com   Create a file named .env in the project root:
-
-ADMIN_PASSWORD=securepassword123   ```env
-
-```   # Database
-
-   DB_NAME=ecommerce_db
-
-### 5) Run the application   DB_USER=postgres
-
-```powershell   DB_PASS=your_postgres_password
-
-# Development mode (with nodemon auto-restart)   DB_HOST=localhost
-
-npm run dev   DB_DIALECT=postgres
-
-
-
-# Production mode   # App
-
-npm start   PORT=3000
-
-```   JWT_SECRET=your_very_strong_secret_key_here
-
-   ADMIN_EMAIL=admin@example.com
-
-When the server starts, it will:   ADMIN_PASSWORD=securepassword123
-
-- Connect to PostgreSQL and sync the database schema   ```
-
-- Create default admin user if it doesn't exist
-
-- Print the AdminJS dashboard URL   ### 5) Run
-
-   ```powershell
-
-### Access URLs   # Development (auto-restart)
-
-- **API root**: http://localhost:3000/   npm run dev
-
-- **AdminJS Dashboard**: http://localhost:3000/admin
-
-- **Login API**: POST http://localhost:3000/api/login   # or Production
-
-   npm start
-
-### Default Admin Credentials   ```
-
-- Email: `admin@example.com`
-
-- Password: `securepassword123`   When the server starts, it will:
-
-   - Sync the database schema
-
-⚠️ **Important**: Change these credentials in production!   - Create the default admin user if it doesn't exist
-
-   - Print the AdminJS URL
-
-## API Usage
-
-   ### URLs
-
-### Login Example (PowerShell)   - API root: http://localhost:3000/
-
-```powershell   - AdminJS: http://localhost:3000/admin
-
-$body = @{   - Login API: POST http://localhost:3000/api/login
-
-    email = "admin@example.com"
-
-    password = "securepassword123"   ### Default Admin Login
-
-} | ConvertTo-Json   - Email: admin@example.com
-
-   - Password: securepassword123
-
-$response = Invoke-RestMethod -Uri "http://localhost:3000/api/login" -Method Post -Body $body -ContentType "application/json"
-
-$token = $response.token   ### Test login (PowerShell)
-
-Write-Host "Token: $token"   ```powershell
-
-```   $body = @{ email = "admin@example.com"; password = "securepassword123" } | ConvertTo-Json
-
-   Invoke-RestMethod -Uri "http://localhost:3000/api/login" -Method Post -Body $body -ContentType "application/json"
-
-### Making Authenticated Requests (PowerShell)   ```
+### 2) Install dependencies
 
 ```powershell
+npm install
+```
 
-$headers = @{   ## Notes & Troubleshooting
+### 3) Create PostgreSQL database
 
-    Authorization = "Bearer $token"   - If AdminJS assets show "Unexpected token '<'", ensure you’re on Express 4 (this repo uses ^4.18.2) and the server logs no errors.
+Connect to PostgreSQL and create the database:
 
-}   - If login hangs in browser, CORS is enabled globally; check your request URL/headers.
+```sql
+CREATE DATABASE ecommerce_db;
+```
 
-   - If DB auth fails, verify DB_PASS in .env and that PostgreSQL is running.
+### 4) Create .env
 
+Create a file named .env in the project root:
+
+```env
+# Database
+DB_NAME=ecommerce_db
+DB_USER=postgres
+DB_PASS=your_postgres_password
+DB_HOST=localhost
+DB_DIALECT=postgres
+
+# App
+PORT=3000
+JWT_SECRET=your_very_strong_secret_key_here
+ADMIN_EMAIL=admin@example.com
+ADMIN_PASSWORD=securepassword123
+```
+
+### 5) Run
+
+```powershell
+# Development (auto-restart)
+npm run dev
+
+# or Production
+npm start
+```
+
+When the server starts, it will:
+- Sync the database schema
+- Create the default admin user if it doesn't exist
+- Print the AdminJS URL
+
+## Access URLs
+
+- API root: http://localhost:3000/
+- AdminJS: http://localhost:3000/admin
+- Login API: POST http://localhost:3000/api/login
+
+### Default Admin Login
+
+- Email: admin@example.com
+- Password: securepassword123
+
+Important: Change these credentials in production.
+
+## API Usage (PowerShell)
+
+### Login
+
+```powershell
+$body = @{ email = "admin@example.com"; password = "securepassword123" } | ConvertTo-Json
+$response = Invoke-RestMethod -Uri "http://localhost:3000/api/login" -Method Post -Body $body -ContentType "application/json"
+$token = $response.token
+Write-Host "Token: $token"
+```
+
+### Authenticated request
+
+```powershell
+$headers = @{ Authorization = "Bearer $token" }
 Invoke-RestMethod -Uri "http://localhost:3000/api/verify" -Headers $headers
+```
 
-```   ## License
+## API Endpoints
 
-   ISC
+### Public
+- POST /api/login — Login with email and password, returns JWT token
 
-### API Endpoints├── .gitignore
+### Protected (JWT)
+- GET /api/verify — Verify JWT token validity
+- GET /api/admin/stats — Admin statistics (admin role only)
 
-├── package.json
+## Database Models
 
-#### Public└── server.js                 # Main application entry point
+1. User — User accounts with role-based access (admin/regular)
+2. Category — Product categories
+3. Product — Products with pricing, stock, and category relation
+4. Order — Customer orders with status tracking
+5. OrderItem — Individual items within orders
+6. Setting — Application settings (admin-only)
 
-- `POST /api/login` - Login with email and password, returns JWT token```
+### Relationships
 
+- Product belongs to Category
+- Order belongs to User
+- OrderItem belongs to Order
+- OrderItem belongs to Product
 
+## Role-Based Access (AdminJS)
 
-#### Protected (Requires JWT)## Database Relationships
+### Admin
+- Full access to all resources
+- Can manage users and settings
+- Custom dashboard with system statistics
 
-- `GET /api/verify` - Verify JWT token validity
-
-- `GET /api/admin/stats` - Get admin statistics (admin role only)- Product **belongs to** Category
-
-- Order **belongs to** User
-
-## AdminJS Dashboard- OrderItem **belongs to** Order
-
-- OrderItem **belongs to** Product
-
-Access the admin dashboard at: http://localhost:3000/admin
-
-## Development
-
-### Features
-
-- User management (admin only)### Running in Development Mode
-
-- Category management```bash
-
-- Product management with category relationsnpm run dev
-
-- Order management with status tracking```
-
-- Order item management
-
-- Settings management (admin only)This uses nodemon to automatically restart the server when files change.
-
-- Password fields are hidden in lists for security
-
-### Database Synchronization
-
-### Role-Based Access Control
-
-The application automatically syncs the database schema on startup using:
-
-#### Admin Role```javascript
-
-- Full access to all resourcessequelize.sync({ alter: true })
-
-- Can manage users and settings```
-
-- Can view, create, edit, and delete all records
-
-- Custom dashboard with system statisticsThis will create tables if they don't exist and update existing tables to match the models.
-
-
-
-#### Regular User Role## Deployment
-
-- Can access products, orders, and order items
-
-- Cannot manage users or settings### AWS Deployment (EC2 + RDS)
-
+### Regular User
+- Can access products, categories, orders, and order items
+- Cannot access users or settings
 - Limited dashboard view
-
-1. **Set up RDS PostgreSQL instance**
-
-## AWS Deployment Guide   - Choose Free Tier eligible option
-
-   - Note the endpoint, username, and password
-
-### Prerequisites   - Configure security group to allow connections from EC2
-
-- AWS Account
-
-- AWS CLI installed (optional but recommended)2. **Set up EC2 instance**
-
-   - Launch Ubuntu Server (Free Tier)
-
-### Step 1: Set up RDS PostgreSQL Database   - Install Node.js and npm
-
-   - Clone your repository
-
-1. **Go to AWS RDS Console**   - Update `.env` with RDS credentials
-
-   - Navigate to RDS > Create database
-
-3. **Install and run**
-
-2. **Database Settings**   ```bash
-
-   - Engine: PostgreSQL   npm install
-
-   - Templates: Free tier (if eligible)   npm install -g pm2
-
-   - DB instance identifier: `ecommerce-db`   pm2 start server.js --name "admin-app"
-
-   - Master username: `postgres`   pm2 startup
-
-   - Master password: Choose a strong password   pm2 save
-
-   - DB instance class: `db.t3.micro` (free tier eligible)   ```
-
-   - Storage: 20 GB (free tier eligible)
-
-## Security Considerations
-
-3. **Connectivity**
-
-   - Public access: Yes (for easier setup; use VPC for production)- ✅ Passwords are hashed using bcrypt before storage
-
-   - VPC security group: Create new- ✅ JWT tokens expire after 24 hours
-
-   - Note the security group ID- ✅ Password fields are hidden in AdminJS interface
-
-- ✅ Environment variables for sensitive data
-
-4. **Additional Configuration**- ⚠️ Change default admin credentials
-
-   - Initial database name: `ecommerce_db`- ⚠️ Use strong JWT_SECRET in production
-
-- ⚠️ Enable HTTPS in production
-
-5. **Create Database**- ⚠️ Implement rate limiting for API endpoints
-
-   - Wait 5-10 minutes for RDS to provision- ⚠️ Regular security audits with `npm audit`
-
-   - Note the **Endpoint** (e.g., `ecommerce-db.xxxxx.us-east-1.rds.amazonaws.com`)
 
 ## Troubleshooting
 
-6. **Configure Security Group**
+- AdminJS assets show "Unexpected token '<'": Ensure Express 4.x and no server errors
+- Login hangs in browser: CORS is enabled globally; check request URL/headers
+- DB auth fails: Verify DB_PASS in .env and that PostgreSQL is running
+- Port already in use: Change PORT in .env or stop the process using that port
 
-   - Go to EC2 > Security Groups### Database Connection Error
+## AWS Deployment (EC2 + RDS) — Summary
 
-   - Find the RDS security group```
+1) Create RDS PostgreSQL (Free Tier), note endpoint and credentials
+2) Launch EC2 Ubuntu (Free Tier), install Node.js, Git, PM2
+3) Clone repo, npm install, create .env with RDS values
+4) Start with PM2: pm2 start server.js --name "ecommerce-admin"; pm2 save
+5) Optional: Nginx reverse proxy and Let's Encrypt SSL
 
-   - Add Inbound Rule:Error: password authentication failed for user "postgres"
+Detailed step-by-step commands are included later in this README under “AWS Deployment Guide”.
 
-     - Type: PostgreSQL```
+## Development
 
-     - Port: 5432**Solution**: Update `DB_PASS` in `.env` with your PostgreSQL password
+Run in development mode:
 
-     - Source: Your EC2 security group (we'll create this next)
+```powershell
+npm run dev
+```
 
-### Port Already in Use
+Database sync on startup:
 
-### Step 2: Set up EC2 Instance```
-
-Error: listen EADDRINUSE: address already in use :::3000
-
-1. **Launch EC2 Instance**```
-
-   - Go to EC2 > Launch Instance**Solution**: Change `PORT` in `.env` or stop the process using port 3000
-
-   - Name: `ecommerce-admin-server`
-
-   - AMI: Ubuntu Server 22.04 LTS (Free tier eligible)### AdminJS Not Loading
-
-   - Instance type: `t2.micro` (Free tier eligible)**Solution**: Ensure all dependencies are installed with `npm install`
-
-   - Key pair: Create new or use existing (download .pem file)
+```javascript
+sequelize.sync({ alter: true })
+```
 
 ## License
 
-2. **Network Settings**
+ISC
 
-   - Create security group with:ISC
+---
 
-     - SSH (port 22) from your IP
+## AWS Deployment Guide (EC2 + RDS)
 
-     - HTTP (port 80) from anywhere (0.0.0.0/0)## Author
+### Step 1: RDS PostgreSQL
+- Engine: PostgreSQL, Free Tier template, db.t3.micro, ~20GB storage
+- Create DB ecommerce_db; note endpoint, username, password
+- Security group: allow inbound 5432 from your EC2 security group
 
-     - Custom TCP (port 3000) from anywhere (for testing; use ALB in production)
+### Step 2: EC2 Instance
+- Launch Ubuntu 22.04 LTS, t2.micro, your key pair
+- Open ports: 22 (SSH from your IP), 80 (HTTP), 3000 (optional for testing)
 
-Your Name
-
-3. **Launch Instance**
-
-   - Wait for instance to be in "running" state---
-
-   - Note the **Public IPv4 address**
-
-**Need Help?** Open an issue on GitHub or contact the development team.
-
-4. **Update RDS Security Group**#   e c o m m e r c e - a d m i n - d a s h b o a r d 
-
-   - Go back to RDS security group 
-
-   - Update the PostgreSQL inbound rule source to the EC2 security group ID 
-
-### Step 3: Connect to EC2 and Install Dependencies
+### Step 3: Connect and Install
 
 ```powershell
-# Windows PowerShell (convert .pem to .ppk if using PuTTY, or use OpenSSH)
 ssh -i "path\to\your-key.pem" ubuntu@<EC2-Public-IP>
 ```
 
-Once connected to EC2:
-
 ```bash
-# Update system
 sudo apt update && sudo apt upgrade -y
-
-# Install Node.js 18.x
 curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
-sudo apt-get install -y nodejs
-
-# Verify installation
-node -v
-npm -v
-
-# Install Git
-sudo apt install git -y
-
-# Install PM2 (process manager)
+sudo apt-get install -y nodejs git
 sudo npm install -g pm2
 ```
 
-### Step 4: Deploy Application
+### Step 4: Deploy App
 
 ```bash
-# Clone repository
-cd ~
 git clone https://github.com/NadunD14/ecommerce-admin-dashboard.git
 cd ecommerce-admin-dashboard
-
-# Install dependencies
 npm install
-
-# Create .env file
-nano .env
 ```
 
-Paste this configuration (update with your RDS endpoint and passwords):
+Create .env with your RDS values:
+
 ```env
-# Database Configuration
 DB_NAME=ecommerce_db
 DB_USER=postgres
 DB_PASS=your_rds_master_password
 DB_HOST=ecommerce-db.xxxxx.us-east-1.rds.amazonaws.com
 DB_DIALECT=postgres
-
-# Application Configuration
 PORT=3000
 JWT_SECRET=your_very_strong_secret_key_change_this
 ADMIN_EMAIL=admin@yourdomain.com
 ADMIN_PASSWORD=strong_admin_password_change_this
 ```
 
-Save and exit (Ctrl+X, Y, Enter)
-
-### Step 5: Start Application with PM2
+Start with PM2:
 
 ```bash
-# Start application
 pm2 start server.js --name "ecommerce-admin"
-
-# Configure PM2 to start on system reboot
-pm2 startup systemd
-# Copy and run the command PM2 outputs
-
-# Save PM2 process list
 pm2 save
-
-# Check status
 pm2 status
-pm2 logs ecommerce-admin
-
-# Other useful PM2 commands
-pm2 restart ecommerce-admin
-pm2 stop ecommerce-admin
-pm2 delete ecommerce-admin
 ```
 
-### Step 6: Access Your Application
-
-Your application is now running at:
-- **API**: `http://<EC2-Public-IP>:3000`
-- **AdminJS**: `http://<EC2-Public-IP>:3000/admin`
-
-### Optional: Set up Nginx Reverse Proxy (Recommended for Production)
+### Optional: Nginx Reverse Proxy
 
 ```bash
-# Install Nginx
 sudo apt install nginx -y
-
-# Create Nginx configuration
-sudo nano /etc/nginx/sites-available/ecommerce-admin
-```
-
-Paste this configuration:
-```nginx
+sudo tee /etc/nginx/sites-available/ecommerce-admin > /dev/null <<'NGINX'
 server {
     listen 80;
-    server_name <EC2-Public-IP or your-domain.com>;
-
+    server_name _;
     location / {
         proxy_pass http://localhost:3000;
         proxy_http_version 1.1;
@@ -634,147 +289,35 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
     }
 }
-```
+NGINX
 
-```bash
-# Enable the site
 sudo ln -s /etc/nginx/sites-available/ecommerce-admin /etc/nginx/sites-enabled/
-
-# Test Nginx configuration
-sudo nginx -t
-
-# Restart Nginx
-sudo systemctl restart nginx
-
-# Enable Nginx on boot
-sudo systemctl enable nginx
+sudo nginx -t && sudo systemctl restart nginx
 ```
 
-Now access via: `http://<EC2-Public-IP>` (no port needed)
-
-### Optional: Set up SSL with Let's Encrypt (Requires Domain)
+### Optional: SSL with Let's Encrypt
 
 ```bash
-# Install Certbot
 sudo apt install certbot python3-certbot-nginx -y
-
-# Obtain SSL certificate (replace your-domain.com)
 sudo certbot --nginx -d your-domain.com -d www.your-domain.com
-
-# Auto-renewal is configured automatically
-# Test renewal
-sudo certbot renew --dry-run
 ```
 
-### Monitoring and Maintenance
+### Maintenance
 
 ```bash
-# View application logs
 pm2 logs ecommerce-admin
-
-# Monitor resources
-pm2 monit
-
-# Update application
-cd ~/ecommerce-admin-dashboard
-git pull origin main
-npm install
 pm2 restart ecommerce-admin
-
-# Check system resources
-htop  # Install with: sudo apt install htop
+cd ~/ecommerce-admin-dashboard && git pull origin main && npm install && pm2 restart ecommerce-admin
 ```
-
-### Security Recommendations for Production
-
-1. **Change default credentials** in `.env`
-2. **Use environment-specific secrets** for `JWT_SECRET`
-3. **Enable HTTPS** (use Let's Encrypt or AWS Certificate Manager)
-4. **Restrict RDS access** to only EC2 security group
-5. **Restrict EC2 SSH** to your IP only
-6. **Set up AWS CloudWatch** for monitoring
-7. **Enable automated backups** for RDS
-8. **Use AWS Secrets Manager** for sensitive data
-9. **Set up AWS IAM roles** instead of access keys
-10. **Implement rate limiting** for API endpoints
-
-### Cost Estimation (AWS Free Tier)
-
-- **EC2 t2.micro**: 750 hours/month free for 12 months
-- **RDS db.t3.micro**: 750 hours/month free for 12 months
-- **Storage**: 20 GB free
-- **Data transfer**: 15 GB free
-
-After free tier or beyond limits:
-- EC2 t2.micro: ~$8-10/month
-- RDS db.t3.micro: ~$15-17/month
-- Total: ~$23-27/month
-
-## Troubleshooting
-
-### Database Connection Error
-```
-Error: password authentication failed for user "postgres"
-```
-**Solution**: Update `DB_PASS` in `.env` with your PostgreSQL password
-
-### Port Already in Use
-```
-Error: listen EADDRINUSE: address already in use :::3000
-```
-**Solution**: 
-- Change `PORT` in `.env`, or
-- Stop the process: `pm2 stop ecommerce-admin` (on server) or find and kill the process
-
-### AdminJS Assets Not Loading
-**Solution**: 
-- Ensure Express 4.x is installed (check `package.json`)
-- Clear browser cache
-- Check server logs: `pm2 logs ecommerce-admin`
-
-### CORS Issues
-**Solution**: CORS is enabled globally. If still having issues, check that your request includes proper headers:
-```javascript
-headers: {
-  'Content-Type': 'application/json',
-  'Authorization': 'Bearer your-token-here'
-}
-```
-
-### AWS RDS Connection Timeout
-**Solution**:
-- Verify RDS security group allows inbound from EC2 security group
-- Check RDS is publicly accessible (for initial setup)
-- Verify endpoint URL in `.env`
-- Test connection: `psql -h <rds-endpoint> -U postgres -d ecommerce_db`
-
-## Development
-
-### Running in Development Mode
-```powershell
-npm run dev
-```
-This uses nodemon to automatically restart the server when files change.
-
-### Database Synchronization
-The application automatically syncs the database schema on startup using:
-```javascript
-sequelize.sync({ alter: true })
-```
-This creates tables if they don't exist and updates existing tables to match models.
-
-## License
-
-ISC
 
 ## Contributing
 
 1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
+2. Create your feature branch (git checkout -b feature/amazing-feature)
+3. Commit your changes (git commit -m "Add some amazing feature")
+4. Push to the branch (git push origin feature/amazing-feature)
 5. Open a Pull Request
 
 ---
 
-**Need Help?** Open an issue on [GitHub](https://github.com/NadunD14/ecommerce-admin-dashboard/issues) or contact the development team.
+Need help? Open an issue on GitHub: https://github.com/NadunD14/ecommerce-admin-dashboard/issues
