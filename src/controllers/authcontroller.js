@@ -1,6 +1,6 @@
 // src/controllers/authController.js
-const jwt = require('jsonwebtoken');
-const { User } = require('../models/inedx');
+import jwt from 'jsonwebtoken';
+import { User } from '../models/inedx.js';
 
 const authController = {
     // Login endpoint
@@ -80,4 +80,4 @@ const authController = {
     },
 };
 
-module.exports = authController;
+export default authController;

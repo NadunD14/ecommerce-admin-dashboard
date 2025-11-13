@@ -1,6 +1,6 @@
 // src/models/Setting.js
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
+import { DataTypes } from 'sequelize';
+import sequelize from '../config/database.js';
 
 const Setting = sequelize.define('Setting', {
     id: {
@@ -29,4 +29,4 @@ const Setting = sequelize.define('Setting', {
     timestamps: true,
 });
 
-module.exports = Setting;
+export default Setting;

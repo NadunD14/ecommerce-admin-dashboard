@@ -1,11 +1,11 @@
 // src/models/index.js
-const sequelize = require('../config/database');
-const User = require('./User');
-const Category = require('./Category');
-const Product = require('./Product');
-const Order = require('./Order');
-const OrderItem = require('./OrderItem');
-const Setting = require('./Setting');
+import sequelize from '../config/database.js';
+import User from './User.js';
+import Category from './Category.js';
+import Product from './Product.js';
+import Order from './Order.js';
+import OrderItem from './OrderItem.js';
+import Setting from './Setting.js';
 
 // Define Associations
 
@@ -49,7 +49,7 @@ Product.hasMany(OrderItem, {
     as: 'orderItems',
 });
 
-module.exports = {
+export {
     sequelize,
     User,
     Category,
