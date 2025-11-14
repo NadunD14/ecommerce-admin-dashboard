@@ -29,14 +29,16 @@ User.hasMany(Order, {
     as: 'orders',
 });
 
-// OrderItem belongs to Order
+// OrderItem belongs to Order (cascade deletes)
 OrderItem.belongsTo(Order, {
     foreignKey: 'orderId',
     as: 'order',
+    onDelete: 'CASCADE',
 });
 Order.hasMany(OrderItem, {
     foreignKey: 'orderId',
     as: 'orderItems',
+    onDelete: 'CASCADE',
 });
 
 // OrderItem belongs to Product

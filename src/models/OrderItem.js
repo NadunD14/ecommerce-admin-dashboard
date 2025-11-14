@@ -2,12 +2,24 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../config/database.js';
 
+// Order line item model
 const OrderItem = sequelize.define('OrderItem', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true,
     },
+    // Order ID - FK to Order (hidden in AdminJS, auto-populated)
+    orderId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+    },
+    // Product - FK to Product
+    productId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+    },
+    // Quantity - must be > 0
     quantity: {
         type: DataTypes.INTEGER,
         allowNull: false,
@@ -15,14 +27,16 @@ const OrderItem = sequelize.define('OrderItem', {
             min: 1,
         },
     },
-    price: {
+    // Unit Price - captured at time of order (read-only in AdminJS)
+    unitPrice: {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false,
         validate: {
             min: 0,
         },
     },
-    subtotal: {
+    // Line Total = unitPrice * quantity (read-only in AdminJS)
+    lineTotal: {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false,
         validate: {
@@ -31,6 +45,35 @@ const OrderItem = sequelize.define('OrderItem', {
     },
 }, {
     timestamps: true,
+});
+
+// Auto-calculate lineTotal if not provided
+OrderItem.beforeValidate(async (item) => {
+    const qty = Number(item.quantity || 0);
+    const price = Number(item.unitPrice || 0);
+    if ((item.lineTotal === undefined || item.lineTotal === null) && qty && price) {
+        item.lineTotal = (qty * price).toFixed(2);
+    }
+});
+
+// Recalculate Order.totalAmount when OrderItems change
+async function recalcOrderTotal(orderId) {
+    if (!orderId) return;
+    const { OrderItem, Order } = sequelize.models;
+    const sum = await OrderItem.sum('lineTotal', { where: { orderId } });
+    await Order.update({ totalAmount: (sum || 0).toFixed(2) }, { where: { id: orderId } });
+}
+
+OrderItem.afterCreate(async (item) => {
+    await recalcOrderTotal(item.orderId);
+});
+
+OrderItem.afterUpdate(async (item) => {
+    await recalcOrderTotal(item.orderId);
+});
+
+OrderItem.afterDestroy(async (item) => {
+    await recalcOrderTotal(item.orderId);
 });
 
 export default OrderItem;
