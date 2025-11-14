@@ -1,83 +1,71 @@
-// src/config/dashboard.jsx
-import React, { useEffect, useState } from 'react';
-import { Box, H3, Text, Card } from '@adminjs/design-system';
-import { ApiClient, useCurrentAdmin } from 'adminjs';
+import React, { useEffect, useState } from 'react'
+import { Box, H1, Text, ValueGroup, ValueGroupLabel, Illustration } from '@adminjs/design-system'
+import { ApiClient, useCurrentAdmin } from 'adminjs'
 
-const api = new ApiClient();
+const api = new ApiClient()
+
+const Stat = ({ label, value }) => (
+    <Box variant="container" padding="lg" mr="lg" mb="lg">
+        <ValueGroup>
+            <ValueGroupLabel>{label}</ValueGroupLabel>
+            <Text variant="lg" fontWeight="bold">{value !== null && value !== undefined ? value : '—'}</Text>
+        </ValueGroup>
+    </Box>
+)
 
 const Dashboard = () => {
-    const [currentAdmin] = useCurrentAdmin();
-    const [stats, setStats] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [data, setData] = useState(null)
+    const [loading, setLoading] = useState(true)
+    const { currentAdmin } = useCurrentAdmin()
 
     useEffect(() => {
-        api.getDashboard()
-            .then((response) => {
-                setStats(response.data);
-                setLoading(false);
-            })
-            .catch((error) => {
-                console.error('Error loading dashboard:', error);
-                setLoading(false);
-            });
-    }, []);
+        const load = async () => {
+            try {
+                const res = await api.getDashboard()
+                setData(res?.data || null)
+            } catch (e) {
+                // ignore
+            } finally {
+                setLoading(false)
+            }
+        }
+        load()
+    }, [])
 
     if (loading) {
-        return <Box padding="xxl"><Text>Loading...</Text></Box>;
+        return (
+            <Box variant="container" p="lg">
+                <Text>Loading dashboard…</Text>
+            </Box>
+        )
     }
 
-    const isAdmin = currentAdmin?.role === 'admin';
+    if (!data) {
+        return (
+            <Box variant="container" p="xl" display="flex" flexDirection="column" alignItems="center" justifyContent="center">
+                <Illustration variant="NoData" width={200} height={200} />
+                <Text mt="lg">No dashboard data available.</Text>
+            </Box>
+        )
+    }
+
+    const { message, stats } = data
 
     return (
-        <Box padding="xxl">
-            <H3 marginBottom="xl">
-                {isAdmin ? '🎯 Admin Dashboard' : '👤 User Dashboard'}
-            </H3>
-            
-            <Text marginBottom="xxl">
-                {stats?.message || `Welcome ${currentAdmin?.email}!`}
-            </Text>
-
-            <Box display="grid" gridTemplateColumns="repeat(auto-fit, minmax(250px, 1fr))" gridGap="lg">
-                {isAdmin && stats?.stats?.totalUsers !== null && (
-                    <Card padding="lg">
-                        <Text fontSize="sm" color="grey60">Total Users</Text>
-                        <H3 marginTop="sm">{stats.stats.totalUsers}</H3>
-                    </Card>
+        <Box>
+            <H1>Dashboard</H1>
+            <Text mb="xl">{message}</Text>
+            <Box display="flex" flexWrap="wrap">
+                {currentAdmin?.role === 'admin' && (
+                    <Stat label="Total Users" value={stats?.totalUsers} />
                 )}
-                
-                {stats?.stats?.totalProducts !== null && (
-                    <Card padding="lg">
-                        <Text fontSize="sm" color="grey60">Total Products</Text>
-                        <H3 marginTop="sm">{stats.stats.totalProducts}</H3>
-                    </Card>
-                )}
-                
-                {stats?.stats?.totalOrders !== null && (
-                    <Card padding="lg">
-                        <Text fontSize="sm" color="grey60">Total Orders</Text>
-                        <H3 marginTop="sm">{stats.stats.totalOrders}</H3>
-                    </Card>
-                )}
-                
-                {stats?.stats?.totalCategories !== null && (
-                    <Card padding="lg">
-                        <Text fontSize="sm" color="grey60">Total Categories</Text>
-                        <H3 marginTop="sm">{stats.stats.totalCategories}</H3>
-                    </Card>
-                )}
-            </Box>
-
-            <Box marginTop="xxl">
-                <Card padding="lg">
-                    <Text fontSize="sm" color="grey60">Your Role</Text>
-                    <Text marginTop="sm" fontSize="lg" fontWeight="bold">
-                        {isAdmin ? '🔑 Administrator' : '👤 Regular User'}
-                    </Text>
-                </Card>
+                <Stat label="Total Products" value={stats?.totalProducts} />
+                <Stat label="Total Orders" value={stats?.totalOrders} />
+                <Stat label="Total Categories" value={stats?.totalCategories} />
             </Box>
         </Box>
-    );
-};
+    )
+}
 
-export default Dashboard;
+export default Dashboard
+

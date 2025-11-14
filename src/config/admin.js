@@ -1,24 +1,28 @@
 // src/config/admin.js
-import AdminJS from 'adminjs';
+import AdminJS, { ComponentLoader } from 'adminjs';
 import AdminJSExpress from '@adminjs/express';
 import AdminJSSequelize from '@adminjs/sequelize';
 import { User, Category, Product, Order, OrderItem, Setting, sequelize } from '../models/inedx.js';
-import { Components, componentLoader } from './components.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Register the Sequelize adapter
 AdminJS.registerAdapter(AdminJSSequelize);
 
 // AdminJS configuration
+// Register custom components
+const componentLoader = new ComponentLoader();
+const DashboardComponent = componentLoader.add('Dashboard', path.join(__dirname, './dashboard.jsx'));
+
 const adminJs = new AdminJS({
     componentLoader,
     resources: [
         {
             resource: User,
             options: {
-                navigation: {
-                    name: 'User Management',
-                    icon: 'User',
-                },
                 properties: {
                     password: {
                         isVisible: { list: false, show: false, edit: true, filter: false },
@@ -29,15 +33,19 @@ const adminJs = new AdminJS({
                 },
                 // Only admins can manage users
                 isAccessible: ({ currentAdmin }) => currentAdmin && currentAdmin.role === 'admin',
+                // Hide from sidebar for regular users by denying all actions
+                actions: {
+                    list: { isAccessible: ({ currentAdmin }) => currentAdmin && currentAdmin.role === 'admin' },
+                    show: { isAccessible: ({ currentAdmin }) => currentAdmin && currentAdmin.role === 'admin' },
+                    new: { isAccessible: ({ currentAdmin }) => currentAdmin && currentAdmin.role === 'admin' },
+                    edit: { isAccessible: ({ currentAdmin }) => currentAdmin && currentAdmin.role === 'admin' },
+                    delete: { isAccessible: ({ currentAdmin }) => currentAdmin && currentAdmin.role === 'admin' },
+                },
             },
         },
         {
             resource: Category,
             options: {
-                navigation: {
-                    name: 'Products',
-                    icon: 'ShoppingCart',
-                },
                 properties: {
                     id: {
                         isVisible: { list: true, show: true, edit: false, filter: true },
@@ -50,10 +58,6 @@ const adminJs = new AdminJS({
         {
             resource: Product,
             options: {
-                navigation: {
-                    name: 'Products',
-                    icon: 'ShoppingCart',
-                },
                 properties: {
                     id: {
                         isVisible: { list: true, show: true, edit: false, filter: true },
@@ -69,10 +73,6 @@ const adminJs = new AdminJS({
         {
             resource: Order,
             options: {
-                navigation: {
-                    name: 'Orders',
-                    icon: 'Package',
-                },
                 properties: {
                     id: {
                         isVisible: { list: true, show: true, edit: false, filter: true },
@@ -88,10 +88,6 @@ const adminJs = new AdminJS({
         {
             resource: OrderItem,
             options: {
-                navigation: {
-                    name: 'Orders',
-                    icon: 'Package',
-                },
                 properties: {
                     id: {
                         isVisible: { list: true, show: true, edit: false, filter: true },
@@ -110,10 +106,6 @@ const adminJs = new AdminJS({
         {
             resource: Setting,
             options: {
-                navigation: {
-                    name: 'Configuration',
-                    icon: 'Settings',
-                },
                 properties: {
                     id: {
                         isVisible: { list: true, show: true, edit: false, filter: true },
@@ -121,6 +113,14 @@ const adminJs = new AdminJS({
                 },
                 // Only admins can manage settings
                 isAccessible: ({ currentAdmin }) => currentAdmin && currentAdmin.role === 'admin',
+                // Hide from sidebar for regular users by denying all actions
+                actions: {
+                    list: { isAccessible: ({ currentAdmin }) => currentAdmin && currentAdmin.role === 'admin' },
+                    show: { isAccessible: ({ currentAdmin }) => currentAdmin && currentAdmin.role === 'admin' },
+                    new: { isAccessible: ({ currentAdmin }) => currentAdmin && currentAdmin.role === 'admin' },
+                    edit: { isAccessible: ({ currentAdmin }) => currentAdmin && currentAdmin.role === 'admin' },
+                    delete: { isAccessible: ({ currentAdmin }) => currentAdmin && currentAdmin.role === 'admin' },
+                },
             },
         },
     ],
@@ -130,7 +130,6 @@ const adminJs = new AdminJS({
         softwareBrothers: false,
     },
     dashboard: {
-        component: Components.Dashboard,
         handler: async (request, response, context) => {
             const { currentAdmin } = context;
 
@@ -155,6 +154,8 @@ const adminJs = new AdminJS({
                 email: currentAdmin.email,
             };
         },
+        // Attach a custom React component for the dashboard UI
+        component: DashboardComponent,
     },
 });
 
