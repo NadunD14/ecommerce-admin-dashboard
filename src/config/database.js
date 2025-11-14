@@ -12,7 +12,9 @@ const sequelize = new Sequelize(
     {
         host: process.env.DB_HOST,
         dialect: process.env.DB_DIALECT,
-        logging: false, // Set to true to see SQL queries
+        logging: console.log, // Log full SQL queries
+        logQueryParameters: true, // Include bound parameters in logs
+        benchmark: true, // Include execution time
         dialectOptions: isProduction ? {
             ssl: {
                 require: true,

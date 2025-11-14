@@ -138,26 +138,41 @@ const adminJs = new AdminJS({
                 listProperties: ['id', 'userId', 'orderDate', 'status', 'subtotal', 'taxAmount', 'totalAmount', 'trackingNumber'],
                 showProperties: ['id', 'userId', 'orderDate', 'status', 'subtotal', 'taxAmount', 'totalAmount', 'shippingAddress', 'paymentMethod', 'trackingNumber', 'createdAt', 'updatedAt'],
                 editProperties: ['status', 'shippingAddress', 'paymentMethod', 'trackingNumber'],
+                newProperties: ['orderDate', 'status', 'shippingAddress', 'paymentMethod', 'trackingNumber'],
                 filterProperties: ['userId', 'status', 'orderDate'],
                 actions: {
                     new: {
-                        before: async (request) => {
+                        before: async (request, context) => {
                             if (request.payload) {
-                                // Prevent manual override of calculated fields
-                                delete request.payload.totalAmount;
-                                delete request.payload.subtotal;
-                                delete request.payload.taxAmount;
+                                // Initialize calculated fields with defaults (will be recalculated when items are added)
+                                request.payload.subtotal = 0;
+                                request.payload.taxAmount = 0;
+                                request.payload.totalAmount = 0;
                                 // Set orderDate to now if not provided
                                 if (!request.payload.orderDate) {
                                     request.payload.orderDate = new Date();
                                 }
+                                // Ensure status has a default value
+                                if (!request.payload.status) {
+                                    request.payload.status = 'Pending';
+                                }
+                                // Attach the logged-in admin as the order's user (customer)
+                                if (context?.currentAdmin?.id) {
+                                    request.payload.userId = context.currentAdmin.id;
+                                }
+                                console.log('Order creation payload:', JSON.stringify(request.payload, null, 2));
                             }
                             return request;
+                        },
+                        after: async (response) => {
+                            console.log('Order created successfully:', response.record?.params);
+                            return response;
                         },
                     },
                     edit: {
                         before: async (request) => {
                             if (request.payload) {
+                                // Prevent manual override of calculated fields during edit
                                 delete request.payload.totalAmount;
                                 delete request.payload.subtotal;
                                 delete request.payload.taxAmount;
