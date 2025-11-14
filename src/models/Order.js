@@ -9,10 +9,10 @@ const Order = sequelize.define('Order', {
         primaryKey: true,
         autoIncrement: true,
     },
-    // User (Customer) - FK to User
+    // User (Customer) - FK to User (optional for anonymous orders)
     userId: {
         type: DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: true,
     },
     // Order Date - visible, defaults to now
     orderDate: {
@@ -31,8 +31,26 @@ const Order = sequelize.define('Order', {
         type: DataTypes.TEXT,
         allowNull: true,
     },
-    // Total Amount - calculated from line items, read-only in AdminJS
+    // Total Amount - calculated from line items + tax, read-only in AdminJS
     totalAmount: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: false,
+        defaultValue: 0,
+        validate: {
+            min: 0,
+        },
+    },
+    // Subtotal - before tax
+    subtotal: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: false,
+        defaultValue: 0,
+        validate: {
+            min: 0,
+        },
+    },
+    // Tax Amount - calculated from subtotal * tax rate
+    taxAmount: {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false,
         defaultValue: 0,

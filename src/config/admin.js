@@ -85,7 +85,8 @@ const adminJs = new AdminJS({
                     },
                     userId: {
                         reference: 'Users',
-                        isRequired: true,
+                        isRequired: false,
+                        isVisible: { list: true, show: true, edit: false, new: false, filter: true },
                     },
                     orderDate: {
                         type: 'datetime',
@@ -104,6 +105,16 @@ const adminJs = new AdminJS({
                     },
                     shippingAddress: {
                         type: 'textarea',
+                    },
+                    subtotal: {
+                        type: 'number',
+                        isVisible: { list: true, show: true, edit: false, new: false, filter: false },
+                        isDisabled: true,
+                    },
+                    taxAmount: {
+                        type: 'number',
+                        isVisible: { list: true, show: true, edit: false, new: false, filter: false },
+                        isDisabled: true,
                     },
                     totalAmount: {
                         type: 'number',
@@ -124,16 +135,18 @@ const adminJs = new AdminJS({
                 },
                 // All authenticated users can access orders
                 isAccessible: ({ currentAdmin }) => !!currentAdmin,
-                listProperties: ['id', 'userId', 'orderDate', 'status', 'totalAmount', 'trackingNumber'],
-                showProperties: ['id', 'userId', 'orderDate', 'status', 'totalAmount', 'shippingAddress', 'paymentMethod', 'trackingNumber', 'createdAt', 'updatedAt'],
-                editProperties: ['userId', 'status', 'shippingAddress', 'paymentMethod', 'trackingNumber'],
+                listProperties: ['id', 'userId', 'orderDate', 'status', 'subtotal', 'taxAmount', 'totalAmount', 'trackingNumber'],
+                showProperties: ['id', 'userId', 'orderDate', 'status', 'subtotal', 'taxAmount', 'totalAmount', 'shippingAddress', 'paymentMethod', 'trackingNumber', 'createdAt', 'updatedAt'],
+                editProperties: ['status', 'shippingAddress', 'paymentMethod', 'trackingNumber'],
                 filterProperties: ['userId', 'status', 'orderDate'],
                 actions: {
                     new: {
                         before: async (request) => {
                             if (request.payload) {
-                                // Prevent manual override of calculated field
+                                // Prevent manual override of calculated fields
                                 delete request.payload.totalAmount;
+                                delete request.payload.subtotal;
+                                delete request.payload.taxAmount;
                                 // Set orderDate to now if not provided
                                 if (!request.payload.orderDate) {
                                     request.payload.orderDate = new Date();
@@ -146,6 +159,8 @@ const adminJs = new AdminJS({
                         before: async (request) => {
                             if (request.payload) {
                                 delete request.payload.totalAmount;
+                                delete request.payload.subtotal;
+                                delete request.payload.taxAmount;
                             }
                             return request;
                         },

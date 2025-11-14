@@ -59,9 +59,25 @@ OrderItem.beforeValidate(async (item) => {
 // Recalculate Order.totalAmount when OrderItems change
 async function recalcOrderTotal(orderId) {
     if (!orderId) return;
-    const { OrderItem, Order } = sequelize.models;
-    const sum = await OrderItem.sum('lineTotal', { where: { orderId } });
-    await Order.update({ totalAmount: (sum || 0).toFixed(2) }, { where: { id: orderId } });
+    const { OrderItem, Order, Setting } = sequelize.models;
+
+    // Calculate subtotal from all line items
+    const subtotal = await OrderItem.sum('lineTotal', { where: { orderId } }) || 0;
+
+    // Get global tax rate from settings
+    const taxRateSetting = await Setting.findOne({ where: { key: 'GLOBAL_TAX_RATE' } });
+    const taxRate = taxRateSetting ? parseFloat(taxRateSetting.value) / 100 : 0;
+
+    // Calculate tax and total
+    const taxAmount = (subtotal * taxRate).toFixed(2);
+    const totalAmount = (parseFloat(subtotal) + parseFloat(taxAmount)).toFixed(2);
+
+    // Update order
+    await Order.update({
+        subtotal: subtotal.toFixed(2),
+        taxAmount,
+        totalAmount
+    }, { where: { id: orderId } });
 }
 
 OrderItem.afterCreate(async (item) => {

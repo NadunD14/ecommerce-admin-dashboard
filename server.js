@@ -2,7 +2,7 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
-import { sequelize, User } from './src/models/inedx.js';
+import { sequelize, User, Setting } from './src/models/inedx.js';
 import authController from './src/controllers/authcontroller.js';
 import authMiddleware from './src/middleware/authMiddleware.js';
 import roleMiddleware from './src/middleware/roleMiddleware.js';
@@ -108,6 +108,69 @@ const initializeDatabase = async () => {
             console.log(`✓ Default admin user created: ${adminEmail}`);
         } else {
             console.log(`✓ Admin user already exists: ${adminEmail}`);
+        }
+
+        // Create default settings if they don't exist
+        const defaultSettings = [
+            {
+                key: 'GLOBAL_TAX_RATE',
+                value: '10',
+                description: 'Global tax rate percentage applied to all orders',
+                type: 'number'
+            },
+            {
+                key: 'SITE_NAME',
+                value: 'E-Commerce Admin',
+                description: 'Name of the e-commerce site',
+                type: 'string'
+            },
+            {
+                key: 'CURRENCY_SYMBOL',
+                value: '$',
+                description: 'Currency symbol for display',
+                type: 'string'
+            },
+            {
+                key: 'ITEMS_PER_PAGE',
+                value: '20',
+                description: 'Default number of items to display per page',
+                type: 'number'
+            },
+            {
+                key: 'ENABLE_REGISTRATION',
+                value: 'true',
+                description: 'Allow new user registrations',
+                type: 'boolean'
+            },
+            {
+                key: 'LOW_STOCK_THRESHOLD',
+                value: '10',
+                description: 'Threshold for low stock warnings',
+                type: 'number'
+            },
+            {
+                key: 'SHIPPING_COST',
+                value: '5.00',
+                description: 'Default shipping cost',
+                type: 'number'
+            },
+            {
+                key: 'FREE_SHIPPING_MINIMUM',
+                value: '50.00',
+                description: 'Minimum order amount for free shipping',
+                type: 'number'
+            }
+        ];
+
+        for (const setting of defaultSettings) {
+            const [settingRecord, settingCreated] = await Setting.findOrCreate({
+                where: { key: setting.key },
+                defaults: setting
+            });
+
+            if (settingCreated) {
+                console.log(`✓ Default setting created: ${setting.key}`);
+            }
         }
 
         return true;
