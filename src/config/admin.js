@@ -3,16 +3,22 @@ import AdminJS from 'adminjs';
 import AdminJSExpress from '@adminjs/express';
 import AdminJSSequelize from '@adminjs/sequelize';
 import { User, Category, Product, Order, OrderItem, Setting, sequelize } from '../models/inedx.js';
+import { Components, componentLoader } from './components.js';
 
 // Register the Sequelize adapter
 AdminJS.registerAdapter(AdminJSSequelize);
 
 // AdminJS configuration
 const adminJs = new AdminJS({
+    componentLoader,
     resources: [
         {
             resource: User,
             options: {
+                navigation: {
+                    name: 'User Management',
+                    icon: 'User',
+                },
                 properties: {
                     password: {
                         isVisible: { list: false, show: false, edit: true, filter: false },
@@ -23,12 +29,15 @@ const adminJs = new AdminJS({
                 },
                 // Only admins can manage users
                 isAccessible: ({ currentAdmin }) => currentAdmin && currentAdmin.role === 'admin',
-                isVisible: ({ currentAdmin }) => currentAdmin && currentAdmin.role === 'admin',
             },
         },
         {
             resource: Category,
             options: {
+                navigation: {
+                    name: 'Products',
+                    icon: 'ShoppingCart',
+                },
                 properties: {
                     id: {
                         isVisible: { list: true, show: true, edit: false, filter: true },
@@ -41,6 +50,10 @@ const adminJs = new AdminJS({
         {
             resource: Product,
             options: {
+                navigation: {
+                    name: 'Products',
+                    icon: 'ShoppingCart',
+                },
                 properties: {
                     id: {
                         isVisible: { list: true, show: true, edit: false, filter: true },
@@ -56,6 +69,10 @@ const adminJs = new AdminJS({
         {
             resource: Order,
             options: {
+                navigation: {
+                    name: 'Orders',
+                    icon: 'Package',
+                },
                 properties: {
                     id: {
                         isVisible: { list: true, show: true, edit: false, filter: true },
@@ -71,6 +88,10 @@ const adminJs = new AdminJS({
         {
             resource: OrderItem,
             options: {
+                navigation: {
+                    name: 'Orders',
+                    icon: 'Package',
+                },
                 properties: {
                     id: {
                         isVisible: { list: true, show: true, edit: false, filter: true },
@@ -89,6 +110,10 @@ const adminJs = new AdminJS({
         {
             resource: Setting,
             options: {
+                navigation: {
+                    name: 'Configuration',
+                    icon: 'Settings',
+                },
                 properties: {
                     id: {
                         isVisible: { list: true, show: true, edit: false, filter: true },
@@ -96,7 +121,6 @@ const adminJs = new AdminJS({
                 },
                 // Only admins can manage settings
                 isAccessible: ({ currentAdmin }) => currentAdmin && currentAdmin.role === 'admin',
-                isVisible: ({ currentAdmin }) => currentAdmin && currentAdmin.role === 'admin',
             },
         },
     ],
@@ -106,6 +130,7 @@ const adminJs = new AdminJS({
         softwareBrothers: false,
     },
     dashboard: {
+        component: Components.Dashboard,
         handler: async (request, response, context) => {
             const { currentAdmin } = context;
 
