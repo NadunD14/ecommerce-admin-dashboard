@@ -45,6 +45,7 @@ jobs:
           chmod 600 private_key.pem
           
           # Copy files to EC2
+          ssh -i private_key.pem -o StrictHostKeyChecking=no ${USER}@${HOST} "mkdir -p ~/ecommerce-admin-dashboard"
           scp -i private_key.pem -o StrictHostKeyChecking=no -r \
             package*.json server.js src/ \
             ${USER}@${HOST}:~/ecommerce-admin-dashboard/
@@ -58,8 +59,12 @@ jobs:
           ssh -i private_key.pem -o StrictHostKeyChecking=no \
             ${USER}@${HOST} << 'ENDSSH'
             cd ~/ecommerce-admin-dashboard
-            npm install --production
-            pm2 restart ecommerce-admin || pm2 start server.js --name ecommerce-admin
+            # Ensure clean AdminJS build and deterministic installs
+            rm -rf .adminjs node_modules
+            npm ci --omit=dev
+            # Start or restart with production env
+            export NODE_ENV=production
+            pm2 restart ecommerce-admin || NODE_ENV=production pm2 start server.js --name ecommerce-admin
             pm2 save
           ENDSSH
           
