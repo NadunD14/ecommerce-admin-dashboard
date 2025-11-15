@@ -28,7 +28,7 @@
     "react-dom": "^18.2.0",
     "pg": "^8.16.3",
     "pg-hstore": "^2.3.4",
-    "styled-components": "^6.1.11",
+    "styled-components": "^5.3.9",
     "sequelize": "^6.37.7"
   },
   "devDependencies": {

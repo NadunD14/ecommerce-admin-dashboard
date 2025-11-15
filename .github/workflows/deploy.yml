@@ -61,7 +61,7 @@ jobs:
             cd ~/ecommerce-admin-dashboard
             # Ensure clean AdminJS build and deterministic installs
             rm -rf .adminjs node_modules
-            npm ci --omit=dev
+            npm install --omit=dev
             # Start or restart with production env
             export NODE_ENV=production
             pm2 restart ecommerce-admin || NODE_ENV=production pm2 start server.js --name ecommerce-admin
