@@ -1,8 +1,6 @@
+// src/components/InsightsDashboard.jsx
 import React, { useEffect, useState } from 'react';
-import { Box, H1, H2, Text, ValueGroup, ValueGroupLabel, Button, Icon, Badge } from '@adminjs/design-system';
-import { ApiClient } from 'adminjs';
-
-const api = new ApiClient();
+import { Box, H1, H2, Text, Button, Badge } from '@adminjs/design-system';
 
 const InsightCard = ({ title, value, subtitle, icon, color = '#3b82f6', trend, trendValue }) => (
     <Box
@@ -69,25 +67,28 @@ const InsightsDashboard = () => {
     const [loading, setLoading] = useState(true);
     const [lastRefresh, setLastRefresh] = useState(null);
     const [refreshing, setRefreshing] = useState(false);
+    const [error, setError] = useState(null);
 
     const fetchInsights = async () => {
         try {
-            const response = await fetch('/api/insights/summary', {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-            const data = await response.json();
+            setError(null);
+            const response = await fetch('/api/insights/summary');
 
-            if (data && data.success) {
-                setData(data.data);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+
+            if (result && result.success) {
+                setData(result.data);
                 setLastRefresh(new Date());
             } else {
-                console.error('Invalid response format:', data);
+                throw new Error('Invalid response format');
             }
         } catch (error) {
             console.error('Error fetching insights:', error);
+            setError(error.message);
         } finally {
             setLoading(false);
         }
@@ -96,13 +97,6 @@ const InsightsDashboard = () => {
     const refreshInsights = async () => {
         setRefreshing(true);
         try {
-            await fetch('/api/insights/refresh', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                    'Content-Type': 'application/json'
-                }
-            });
             await fetchInsights();
         } catch (error) {
             console.error('Error refreshing insights:', error);
@@ -120,6 +114,17 @@ const InsightsDashboard = () => {
             <Box p="xl">
                 <Box display="flex" alignItems="center" justifyContent="center" minHeight="200px">
                     <Text>Loading insights...</Text>
+                </Box>
+            </Box>
+        );
+    }
+
+    if (error) {
+        return (
+            <Box p="xl">
+                <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" minHeight="200px">
+                    <Text color="error" mb="lg">Error loading insights: {error}</Text>
+                    <Button onClick={fetchInsights}>Retry</Button>
                 </Box>
             </Box>
         );
@@ -189,7 +194,7 @@ const InsightsDashboard = () => {
                         <H2 mb="lg">💰 Revenue Overview</H2>
                         <InsightCard
                             title="Total Revenue"
-                            value={data?.revenue || 0}
+                            value={`$${(data?.revenue || 0).toFixed(2)}`}
                             subtitle="All-time earnings"
                             icon="💵"
                             color="#8b5cf6"
@@ -249,7 +254,7 @@ const InsightsDashboard = () => {
                         📈 View Analytics
                     </Button>
                     <Button variant="outline" size="sm">
-                        🔍 Audit Logs
+                        📝 Audit Logs
                     </Button>
                 </Box>
             </Box>

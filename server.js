@@ -2,6 +2,7 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
+import session from 'express-session';
 import { sequelize, User, Setting } from './src/models/inedx.js';
 import authController from './src/controllers/authcontroller.js';
 import insightsController from './src/controllers/insightsController.js';
@@ -14,6 +15,18 @@ const PORT = process.env.PORT || 3000;
 
 // Global CORS first
 app.use(cors()); // CORS handles preflight automatically for OPTIONS
+
+// Shared session middleware so AdminJS session is available on API routes
+const sessionMiddleware = session({
+    secret: process.env.JWT_SECRET || 'change_this_secret',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+    },
+});
+app.use(sessionMiddleware);
 
 // AdminJS authentication function
 const authenticate = async (email, password) => {
@@ -69,10 +82,21 @@ app.get('/', (req, res) => {
 app.post('/api/login', authController.login);
 app.get('/api/verify', authMiddleware, authController.verifyToken);
 
-// Insights routes
-app.get('/api/insights', authMiddleware, insightsController.getCurrentInsights);
-app.get('/api/insights/summary', authMiddleware, insightsController.getInsightsSummary);
-app.post('/api/insights/refresh', authMiddleware, roleMiddleware('admin'), insightsController.refreshBasicInsights);
+// Session-based authentication middleware for AdminJS pages
+const sessionAuthMiddleware = (req, res, next) => {
+    // Check if user is authenticated via AdminJS session
+    if (req.session && req.session.adminUser) {
+        req.user = req.session.adminUser;
+        return next();
+    }
+    // If no session, fall back to JWT auth
+    return authMiddleware(req, res, next);
+};
+
+// Insights routes - use session auth for AdminJS compatibility
+app.get('/api/insights', sessionAuthMiddleware, insightsController.getCurrentInsights);
+app.get('/api/insights/summary', sessionAuthMiddleware, insightsController.getInsightsSummary);
+app.post('/api/insights/refresh', sessionAuthMiddleware, roleMiddleware('admin'), insightsController.refreshBasicInsights);
 
 // Example protected route (admin only)
 app.get('/api/admin/stats', authMiddleware, roleMiddleware('admin'), async (req, res) => {
