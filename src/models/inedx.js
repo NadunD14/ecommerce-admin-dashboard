@@ -6,6 +6,7 @@ import Product from './Product.js';
 import Order from './Order.js';
 import OrderItem from './OrderItem.js';
 import Setting from './Setting.js';
+import Insights from './Insights.js';
 
 // Define Associations
 
@@ -59,4 +60,5 @@ export {
     Order,
     OrderItem,
     Setting,
+    Insights,
 };

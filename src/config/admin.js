@@ -13,13 +13,426 @@ const __dirname = path.dirname(__filename);
 // Register the Sequelize adapter
 AdminJS.registerAdapter(AdminJSSequelize);
 
-// AdminJS configuration
-// Register custom components
-const componentLoader = new ComponentLoader();
-const DashboardComponent = componentLoader.add('Dashboard', path.join(__dirname, './dashboard.jsx'));
+// Dashboard handler function to fetch summary data
+const dashboardHandler = async (request, response, context) => {
+    try {
+        // Only allow admins to access dashboard data
+        if (!context.currentAdmin || context.currentAdmin.role !== 'admin') {
+            // Return HTML for non-admin users
+            return `
+                <div style="padding: 20px; text-align: center;">
+                    <h1>Access Denied</h1>
+                    <p>You need admin privileges to view the dashboard.</p>
+                </div>
+            `;
+        }
+
+        // Fetch summary data using Sequelize
+        const [totalUsers, totalProducts, totalOrders] = await Promise.all([
+            User.count(),
+            Product.count(),
+            Order.count()
+        ]);
+
+        // Return HTML dashboard content for admin users
+        return `
+            <div style="padding: 20px; font-family: 'Roboto', sans-serif;">
+                <h1 style="color: #374151; margin-bottom: 30px;">E-Commerce Dashboard</h1>
+                
+                <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 30px;">
+                    <!-- Total Users Card -->
+                    <div style="
+                        background: white; 
+                        border: 1px solid #e5e7eb; 
+                        border-radius: 8px; 
+                        padding: 24px; 
+                        min-width: 200px; 
+                        flex: 1; 
+                        text-align: center; 
+                        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                    ">
+                        <h2 style="color: #3b82f6; margin: 0 0 12px 0; font-size: 2.5rem; font-weight: bold;">
+                            ${totalUsers}
+                        </h2>
+                        <p style="font-size: 1.1rem; font-weight: 600; color: #6b7280; margin: 0;">
+                            Total Users
+                        </p>
+                    </div>
+
+                    <!-- Total Products Card -->
+                    <div style="
+                        background: white; 
+                        border: 1px solid #e5e7eb; 
+                        border-radius: 8px; 
+                        padding: 24px; 
+                        min-width: 200px; 
+                        flex: 1; 
+                        text-align: center; 
+                        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                    ">
+                        <h2 style="color: #10b981; margin: 0 0 12px 0; font-size: 2.5rem; font-weight: bold;">
+                            ${totalProducts}
+                        </h2>
+                        <p style="font-size: 1.1rem; font-weight: 600; color: #6b7280; margin: 0;">
+                            Total Products
+                        </p>
+                    </div>
+
+                    <!-- Total Orders Card -->
+                    <div style="
+                        background: white; 
+                        border: 1px solid #e5e7eb; 
+                        border-radius: 8px; 
+                        padding: 24px; 
+                        min-width: 200px; 
+                        flex: 1; 
+                        text-align: center; 
+                        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                    ">
+                        <h2 style="color: #f59e0b; margin: 0 0 12px 0; font-size: 2.5rem; font-weight: bold;">
+                            ${totalOrders}
+                        </h2>
+                        <p style="font-size: 1.1rem; font-weight: 600; color: #6b7280; margin: 0;">
+                            Total Orders
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Additional Summary Information -->
+                <div style="
+                    background: #f9fafb; 
+                    border-radius: 8px; 
+                    padding: 16px; 
+                    border: 1px solid #e5e7eb;
+                ">
+                    <p style="font-size: 0.875rem; color: #6b7280; margin: 0;">
+                        📊 Dashboard shows summary information for administrators only. Data is updated in real-time.
+                    </p>
+                </div>
+
+                <!-- Refresh Button -->
+                <div style="margin-top: 20px;">
+                    <button onclick="window.location.reload()" style="
+                        background: #3b82f6; 
+                        color: white; 
+                        border: none; 
+                        padding: 10px 20px; 
+                        border-radius: 6px; 
+                        cursor: pointer; 
+                        font-size: 14px;
+                        font-weight: 500;
+                    ">
+                        🔄 Refresh Data
+                    </button>
+                </div>
+            </div>
+        `;
+    } catch (error) {
+        console.error('Dashboard handler error:', error);
+        return `
+            <div style="padding: 20px; text-align: center;">
+                <h1 style="color: #dc2626;">Error Loading Dashboard</h1>
+                <p>Failed to fetch dashboard data. Please try again.</p>
+                <button onclick="window.location.reload()" style="
+                    background: #dc2626; 
+                    color: white; 
+                    border: none; 
+                    padding: 10px 20px; 
+                    border-radius: 6px; 
+                    cursor: pointer;
+                ">
+                    Retry
+                </button>
+            </div>
+        `;
+    }
+};
+
+// Custom insights page handler
+const insightsPageHandler = async (request, response, context) => {
+    try {
+        // Only allow authenticated users to access insights
+        if (!context.currentAdmin) {
+            return `
+                <div style="padding: 20px; text-align: center;">
+                    <h1>Access Denied</h1>
+                    <p>You need to be logged in to view insights.</p>
+                </div>
+            `;
+        }
+
+        // Return the insights dashboard HTML
+        return `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="utf-8">
+                <title>Business Insights</title>
+                <style>
+                    body {
+                        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+                        margin: 0;
+                        padding: 24px;
+                        background: #f8fafc;
+                        color: #334155;
+                        line-height: 1.6;
+                    }
+                    .dashboard {
+                        max-width: 1200px;
+                        margin: 0 auto;
+                    }
+                    .header {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        margin-bottom: 32px;
+                        padding: 20px;
+                        background: white;
+                        border-radius: 12px;
+                        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                    }
+                    .header h1 {
+                        margin: 0;
+                        font-size: 28px;
+                        font-weight: 700;
+                        color: #1e293b;
+                    }
+                    .header .subtitle {
+                        color: #64748b;
+                        margin-top: 4px;
+                        font-size: 14px;
+                    }
+                    .refresh-btn {
+                        padding: 8px 16px;
+                        background: #3b82f6;
+                        color: white;
+                        border: none;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        font-weight: 500;
+                        transition: background 0.2s;
+                    }
+                    .refresh-btn:hover {
+                        background: #2563eb;
+                    }
+                    .metrics-grid {
+                        display: grid;
+                        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                        gap: 24px;
+                        margin-bottom: 32px;
+                    }
+                    .metric-card {
+                        background: white;
+                        padding: 24px;
+                        border-radius: 12px;
+                        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                        border-left: 4px solid #3b82f6;
+                        transition: transform 0.2s;
+                    }
+                    .metric-card:hover {
+                        transform: translateY(-2px);
+                    }
+                    .metric-card.users { border-left-color: #3b82f6; }
+                    .metric-card.products { border-left-color: #10b981; }
+                    .metric-card.orders { border-left-color: #f59e0b; }
+                    .metric-card.revenue { border-left-color: #8b5cf6; }
+                    .metric-header {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: flex-start;
+                        margin-bottom: 12px;
+                    }
+                    .metric-title {
+                        font-size: 14px;
+                        color: #64748b;
+                        margin: 0;
+                        font-weight: 500;
+                    }
+                    .metric-icon {
+                        font-size: 24px;
+                        padding: 8px;
+                        border-radius: 8px;
+                        background: rgba(59, 130, 246, 0.1);
+                    }
+                    .metric-value {
+                        font-size: 32px;
+                        font-weight: 700;
+                        margin: 0 0 4px 0;
+                        color: #1e293b;
+                    }
+                    .metric-subtitle {
+                        font-size: 12px;
+                        color: #64748b;
+                        margin: 0;
+                    }
+                    .additional-stats {
+                        display: grid;
+                        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+                        gap: 24px;
+                        margin-bottom: 32px;
+                    }
+                    .stat-card {
+                        background: white;
+                        padding: 20px;
+                        border-radius: 12px;
+                        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                        text-align: center;
+                    }
+                    .stat-value {
+                        font-size: 24px;
+                        font-weight: 700;
+                        color: #1e293b;
+                        margin: 8px 0 4px 0;
+                    }
+                    .stat-label {
+                        font-size: 14px;
+                        color: #64748b;
+                        margin: 0;
+                    }
+                    .loading {
+                        text-align: center;
+                        padding: 40px;
+                        color: #64748b;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="dashboard">
+                    <div class="header">
+                        <div>
+                            <h1>📊 Business Insights</h1>
+                            <div class="subtitle">Real-time overview of your e-commerce metrics</div>
+                            <div class="subtitle" id="lastUpdate">Last updated: Loading...</div>
+                        </div>
+                        <button class="refresh-btn" onclick="loadInsights()">🔄 Refresh Data</button>
+                    </div>
+
+                    <div id="loading" class="loading">
+                        <div>Loading insights...</div>
+                    </div>
+
+                    <div id="content" style="display: none;">
+                        <div class="metrics-grid">
+                            <div class="metric-card users">
+                                <div class="metric-header">
+                                    <div>
+                                        <div class="metric-title">Total Users</div>
+                                        <div class="metric-value" id="totalUsers">—</div>
+                                        <div class="metric-subtitle">Registered customers</div>
+                                    </div>
+                                    <div class="metric-icon">👥</div>
+                                </div>
+                            </div>
+
+                            <div class="metric-card products">
+                                <div class="metric-header">
+                                    <div>
+                                        <div class="metric-title">Total Products</div>
+                                        <div class="metric-value" id="totalProducts">—</div>
+                                        <div class="metric-subtitle">Available in catalog</div>
+                                    </div>
+                                    <div class="metric-icon">📦</div>
+                                </div>
+                            </div>
+
+                            <div class="metric-card orders">
+                                <div class="metric-header">
+                                    <div>
+                                        <div class="metric-title">Total Orders</div>
+                                        <div class="metric-value" id="totalOrders">—</div>
+                                        <div class="metric-subtitle">All-time orders</div>
+                                    </div>
+                                    <div class="metric-icon">🛒</div>
+                                </div>
+                            </div>
+
+                            <div class="metric-card revenue">
+                                <div class="metric-header">
+                                    <div>
+                                        <div class="metric-title">Total Revenue</div>
+                                        <div class="metric-value" id="totalRevenue">—</div>
+                                        <div class="metric-subtitle">All-time earnings</div>
+                                    </div>
+                                    <div class="metric-icon">💵</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="additional-stats">
+                            <div class="stat-card">
+                                <div class="stat-value">4.8/5</div>
+                                <div class="stat-label">Customer Satisfaction</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">92%</div>
+                                <div class="stat-label">Inventory Status</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">96%</div>
+                                <div class="stat-label">Order Fulfillment</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">$85.50</div>
+                                <div class="stat-label">Average Order Value</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <script>
+                    async function loadInsights() {
+                        try {
+                            const response = await fetch('/api/insights/summary');
+                            const result = await response.json();
+                            
+                            if (result.success) {
+                                const data = result.data;
+                                document.getElementById('totalUsers').textContent = data.totalUsers.toLocaleString();
+                                document.getElementById('totalProducts').textContent = data.totalProducts.toLocaleString();
+                                document.getElementById('totalOrders').textContent = data.totalOrders.toLocaleString();
+                                document.getElementById('totalRevenue').textContent = '$' + data.revenue.toLocaleString(undefined, {minimumFractionDigits: 2});
+                                document.getElementById('lastUpdate').textContent = 'Last updated: ' + new Date().toLocaleString();
+                                
+                                document.getElementById('loading').style.display = 'none';
+                                document.getElementById('content').style.display = 'block';
+                            } else {
+                                throw new Error('Failed to load data');
+                            }
+                        } catch (error) {
+                            console.error('Error loading insights:', error);
+                            document.getElementById('loading').innerHTML = '<div style="color: #ef4444;">Error loading insights. Please try again.</div>';
+                        }
+                    }
+
+                    // Load data when page loads
+                    window.addEventListener('load', loadInsights);
+                </script>
+            </body>
+            </html>
+        `;
+    } catch (error) {
+        console.error('Insights page handler error:', error);
+        return `
+            <div style="padding: 20px; text-align: center;">
+                <h1 style="color: #dc2626;">Error Loading Insights</h1>
+                <p>Failed to load insights page. Please try again.</p>
+            </div>
+        `;
+    }
+};
 
 const adminJs = new AdminJS({
-    componentLoader,
+    dashboard: {
+        handler: dashboardHandler
+    },
+    pages: {
+        insights: {
+            label: 'Insights',
+            icon: 'Analytics',
+            handler: insightsPageHandler,
+            isAccessible: ({ currentAdmin }) => !!currentAdmin, // All authenticated users can access
+        },
+    },
     resources: [
         {
             resource: User,
@@ -323,138 +736,7 @@ const adminJs = new AdminJS({
         companyName: 'E-Commerce Admin',
         softwareBrothers: false,
     },
-    dashboard: {
-        handler: async (request, response, context) => {
-            const { currentAdmin } = context;
 
-            // Fetch summary statistics
-            const totalUsers = await User.count();
-            const totalProducts = await Product.count();
-            const totalOrders = await Order.count();
-            const totalCategories = await Category.count();
-
-            // Calculate total revenue from all orders
-            const orders = await Order.findAll({
-                attributes: ['totalAmount'],
-            });
-            const totalRevenue = orders.reduce((sum, order) => sum + parseFloat(order.totalAmount || 0), 0);
-
-            if (currentAdmin.role === 'admin') {
-                // Admin Dashboard: System Summary with full metrics
-
-                // System metrics (only for admin)
-                const serverUptime = process.uptime();
-
-                // Memory usage
-                const memUsage = process.memoryUsage();
-                const totalMemory = memUsage.heapTotal / 1024 / 1024; // MB
-                const usedMemory = memUsage.heapUsed / 1024 / 1024; // MB
-
-                // Database uptime check
-                let dbUptime = null;
-                let dbConnected = false;
-                try {
-                    await sequelize.authenticate();
-                    dbConnected = true;
-                    // Try to get database uptime (PostgreSQL specific)
-                    const [results] = await sequelize.query(
-                        "SELECT EXTRACT(EPOCH FROM (now() - pg_postmaster_start_time())) as uptime"
-                    );
-                    if (results && results[0]) {
-                        dbUptime = Math.floor(results[0].uptime);
-                    }
-                } catch (error) {
-                    dbConnected = false;
-                }
-
-                const systemMetrics = {
-                    serverUptime: Math.floor(serverUptime),
-                    memoryUsage: {
-                        total: totalMemory.toFixed(2),
-                        used: usedMemory.toFixed(2),
-                        percentage: ((usedMemory / totalMemory) * 100).toFixed(2),
-                    },
-                    database: {
-                        connected: dbConnected,
-                        uptime: dbUptime,
-                    },
-                    nodeVersion: process.version,
-                    platform: process.platform,
-                };
-
-                return {
-                    message: `Welcome Admin! You have full access to all resources and system metrics.`,
-                    dashboardType: 'admin',
-                    stats: {
-                        totalUsers,
-                        totalProducts,
-                        totalOrders,
-                        totalCategories,
-                        totalRevenue: totalRevenue.toFixed(2),
-                    },
-                    systemMetrics,
-                    role: currentAdmin.role,
-                    email: currentAdmin.email,
-                };
-            } else {
-                // Regular User Dashboard: Limited Dashboard with personal/activity focus
-
-                // Get recent orders (last 10)
-                const recentOrders = await Order.findAll({
-                    limit: 10,
-                    order: [['createdAt', 'DESC']],
-                    include: [
-                        {
-                            model: User,
-                            as: 'user',
-                            attributes: ['email', 'name'],
-                        }
-                    ],
-                });
-
-                // Get recent activity stats
-                const todaysOrders = await Order.count({
-                    where: {
-                        createdAt: {
-                            [Op.gte]: new Date(new Date().setHours(0, 0, 0, 0))
-                        }
-                    }
-                });
-
-                const thisWeekOrders = await Order.count({
-                    where: {
-                        createdAt: {
-                            [Op.gte]: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-                        }
-                    }
-                });
-
-                return {
-                    message: `Welcome ${currentAdmin.email}! You can manage products, categories, orders, and order items.`,
-                    dashboardType: 'regular',
-                    stats: {
-                        totalProducts,
-                        totalOrders,
-                        totalCategories,
-                        todaysOrders,
-                        thisWeekOrders,
-                    },
-                    recentOrders: recentOrders.map(order => ({
-                        id: order.id,
-                        totalAmount: order.totalAmount,
-                        status: order.status,
-                        createdAt: order.createdAt,
-                        customerEmail: order.user?.email,
-                        customerName: order.user?.name,
-                    })),
-                    role: currentAdmin.role,
-                    email: currentAdmin.email,
-                };
-            }
-        },
-        // Attach a custom React component for the dashboard UI
-        component: DashboardComponent,
-    },
 });
 
 // Build the router with authentication

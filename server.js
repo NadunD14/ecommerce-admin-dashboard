@@ -4,6 +4,7 @@ import express from 'express';
 import cors from 'cors';
 import { sequelize, User, Setting } from './src/models/inedx.js';
 import authController from './src/controllers/authcontroller.js';
+import insightsController from './src/controllers/insightsController.js';
 import authMiddleware from './src/middleware/authMiddleware.js';
 import roleMiddleware from './src/middleware/roleMiddleware.js';
 import { adminJs, buildAdminRouter } from './src/config/admin.js';
@@ -57,6 +58,9 @@ app.get('/', (req, res) => {
             login: 'POST /api/login',
             admin: 'GET /admin',
             verifyToken: 'GET /api/verify',
+            insights: 'GET /api/insights',
+            insightsSummary: 'GET /api/insights/summary',
+            refreshInsights: 'POST /api/insights/refresh (admin only)',
         },
     });
 });
@@ -64,6 +68,11 @@ app.get('/', (req, res) => {
 // Authentication routes
 app.post('/api/login', authController.login);
 app.get('/api/verify', authMiddleware, authController.verifyToken);
+
+// Insights routes
+app.get('/api/insights', authMiddleware, insightsController.getCurrentInsights);
+app.get('/api/insights/summary', authMiddleware, insightsController.getInsightsSummary);
+app.post('/api/insights/refresh', authMiddleware, roleMiddleware('admin'), insightsController.refreshBasicInsights);
 
 // Example protected route (admin only)
 app.get('/api/admin/stats', authMiddleware, roleMiddleware('admin'), async (req, res) => {
