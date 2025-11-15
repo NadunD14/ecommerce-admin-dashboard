@@ -16,9 +16,12 @@ AdminJS.registerAdapter(AdminJSSequelize);
 // Initialize Component Loader
 const componentLoader = new ComponentLoader();
 
-// Add the InsightsDashboard component - use absolute path
+// Add the InsightsDashboard component - use absolute path with explicit extension
 const Components = {
-    InsightsDashboard: componentLoader.add('InsightsDashboard', path.join(__dirname, '../components/InsightsDashboard')),
+    InsightsDashboard: componentLoader.add(
+        'InsightsDashboard',
+        path.join(__dirname, '../components/InsightsDashboard.jsx')
+    ),
 };
 
 // Dashboard handler function to fetch summary data
