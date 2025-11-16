@@ -5,6 +5,14 @@ const insightsController = {
     // Get current insights directly from models
     async getCurrentInsights(req, res) {
         try {
+            // Check if user is admin
+            if (!req.user || req.user.role !== 'admin') {
+                return res.status(403).json({
+                    success: false,
+                    error: 'Access denied. Admin privileges required.'
+                });
+            }
+
             // Get counts directly from models
             const [totalUsers, totalProducts, totalOrders] = await Promise.all([
                 User.count(),
@@ -79,6 +87,14 @@ const insightsController = {
     // Get insights summary for dashboard
     async getInsightsSummary(req, res) {
         try {
+            // Check if user is admin
+            if (!req.user || req.user.role !== 'admin') {
+                return res.status(403).json({
+                    success: false,
+                    error: 'Access denied. Admin privileges required.'
+                });
+            }
+
             // Get counts directly from models
             const [totalUsers, totalProducts, totalOrders] = await Promise.all([
                 User.count(),

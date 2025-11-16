@@ -75,6 +75,9 @@ const InsightsDashboard = () => {
             const response = await fetch('/api/insights/summary');
 
             if (!response.ok) {
+                if (response.status === 403) {
+                    throw new Error('PERMISSION_DENIED');
+                }
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
@@ -120,6 +123,20 @@ const InsightsDashboard = () => {
     }
 
     if (error) {
+        if (error === 'PERMISSION_DENIED') {
+            return (
+                <Box p="xl">
+                    <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" minHeight="300px">
+                        <Text fontSize="4xl" mb="lg">🔒</Text>
+                        <H2 color="grey80" mb="md">Access Restricted</H2>
+                        <Text color="grey60" textAlign="center" maxWidth="400px">
+                            You don't have permission to view this page. Only administrators can access business insights and analytics.
+                        </Text>
+                    </Box>
+                </Box>
+            );
+        }
+
         return (
             <Box p="xl">
                 <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" minHeight="200px">
