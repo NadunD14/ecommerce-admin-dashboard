@@ -1,10 +1,8 @@
 // src/components/InsightsDashboard.jsx
 import React, { useEffect, useState } from 'react';
-import { Box, H1, H2, Text, Button, Badge, useAdmin } from '@adminjs/design-system';
-// ☝️ CRITICAL: Note the addition of 'useAdmin' from @adminjs/design-system
+import { Box, H1, H2, Text, Button, Badge } from '@adminjs/design-system';
 
 const InsightCard = ({ title, value, subtitle, icon, color = '#3b82f6', trend, trendValue }) => (
-    // ... (InsightCard component remains the same)
     <Box
         variant="container"
         padding="xl"
@@ -56,7 +54,6 @@ const InsightCard = ({ title, value, subtitle, icon, color = '#3b82f6', trend, t
 );
 
 const QuickStat = ({ label, value, color = '#6b7280' }) => (
-    // ... (QuickStat component remains the same)
     <Box display="flex" justifyContent="space-between" alignItems="center" py="sm">
         <Text fontSize="sm" color="grey80">{label}</Text>
         <Text fontSize="sm" fontWeight="bold" color={color}>
@@ -66,19 +63,6 @@ const QuickStat = ({ label, value, color = '#6b7280' }) => (
 );
 
 const InsightsDashboard = () => {
-    const { currentAdmin } = useAdmin(); // 👈 Get the current admin context
-
-    // 🛑 START OF CLIENT-SIDE AUTHORIZATION CHECK
-    if (!currentAdmin || currentAdmin.role !== 'admin') {
-        return (
-            <Box variant="card" p="xl" m="xl" bg="white" borderRadius="lg" border="1px solid #e5e7eb" boxShadow="0 2px 4px rgba(0, 0, 0, 0.1)">
-                <H1 mb="lg" style={{ color: '#ef4444' }}>🚫 Access Denied</H1>
-                <Text>You must have **admin privileges** to view the Business Insights dashboard.</Text>
-            </Box>
-        );
-    }
-    // 🛑 END OF CLIENT-SIDE AUTHORIZATION CHECK
-
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [lastRefresh, setLastRefresh] = useState(null);
@@ -86,13 +70,9 @@ const InsightsDashboard = () => {
     const [error, setError] = useState(null);
 
     const fetchInsights = async () => {
-        // ... (fetchInsights function remains the same, it calls /api/insights/summary)
         try {
             setError(null);
             const response = await fetch('/api/insights/summary');
-
-            // IMPORTANT: Your API endpoint '/api/insights/summary' MUST also check the admin role!
-            // If the API endpoint allows non-admins to fetch data, this is another vulnerability.
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -151,7 +131,6 @@ const InsightsDashboard = () => {
     }
 
     return (
-        // ... (Rest of the component rendering the dashboard remains the same)
         <Box p="xl">
             {/* Header */}
             <Box display="flex" justifyContent="space-between" alignItems="center" mb="xl">
