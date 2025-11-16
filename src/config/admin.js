@@ -164,7 +164,8 @@ const adminJs = new AdminJS({
             label: 'Insights',
             icon: 'Analytics',
             component: Components.InsightsDashboard,
-            isAccessible: ({ currentAdmin }) => !!currentAdmin,
+            isAccessible: ({ currentAdmin }) => currentAdmin && currentAdmin.role === 'admin',
+            isVisible: ({ currentAdmin }) => currentAdmin && currentAdmin.role === 'admin',
         },
     },
     resources: [
